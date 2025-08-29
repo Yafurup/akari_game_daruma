@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 import argparse
 import cv2
-from lib.akari_yolo_lib.oakd_tracking_yolo import OakdTrackingYolo
+import time
+import sys
+import threading
+from playsound import playsound
 
 #AkariClientのインポート
 from akari_client import AkariClient
-#AkariClient、jointsのインスタンスを取得
-akari = AkariClient()  
-joints = akari.joints
-import time
-import sys
-
-from playsound import playsound
 from akari_client.color import Colors
 from akari_client.config import (
     AkariClientConfig,
@@ -19,6 +15,11 @@ from akari_client.config import (
     M5StackGrpcConfig,
 )
 from akari_client.position import Positions
+from lib.akari_yolo_lib.oakd_tracking_yolo import OakdTrackingYolo
+
+#AkariClient、jointsのインスタンスを取得
+akari = AkariClient()
+joints = akari.joints
 m5 = akari.m5stack
 
 # ファイル名をまとめて定義
@@ -29,9 +30,13 @@ AUDIO_FILES = {
     "finish":"voicefile/voice_finish.wav"
 }
 
-def play_audio(key):
+def play_audio_async(key):
+    def _play():
+        playsound(AUDIO_FILES[key])
+    threading.Thread(target=_play, daemon=True).start()
+    
+def play_audio_sync(key):
     playsound(AUDIO_FILES[key])
-
 
 def main() -> None:
     # parse arguments
@@ -105,17 +110,21 @@ def main() -> None:
     previous_positions = {}#過去の位置
     #ループ前に時間記録用変数を初期化
     last_move_time = time.time()
-    move_interval = 5.0
+    operating_time = 4.0
+    waiting_time = 10.0
+    move_interval = waiting_time
+    
     joints.set_servo_enabled(pan=True, tilt=True)
     toggle = False
+    is_detecting = False
     detection_delay = 1.0 #上を向いてから開始するまでの時間
     detection_start_time = None
     OnGame = True
-    Moved = False
+    User_Moved = False
     
     #labels = oakd_tracking_yolo.get_labels()
     m5.set_display_text(text="ゲーム開始", text_color=Colors.GREEN)
-    play_audio("start")
+    play_audio_sync("start")
 
     while not end:
         oakd_tracking_yolo = OakdTrackingYolo(
@@ -135,6 +144,8 @@ def main() -> None:
             frame = None
             detections = []
             data = m5.get()
+            current_time = time.time()
+            
             try:
                 frame, detections, tracklets = oakd_tracking_yolo.get_frame()
             except BaseException:
@@ -145,13 +156,9 @@ def main() -> None:
                 print("==================")
                 break
                 
-            if(data["button_a"]==True):
-                m5.set_display_text(text="ゲーム開始", text_color=Colors.GREEN)
-                play_audio("start")
-                OnGame = True
             if(data["button_c"]==True):
                 m5.set_display_text(text="ゲーム終了", text_color=Colors.GREEN)
-                play_audio("finish")
+                play_audio_sync("finish")
                 joints.move_joint_positions(pan=0, tilt=0.1)
                 OnGame = False
                 oakd_tracking_yolo.close()
@@ -160,20 +167,21 @@ def main() -> None:
 
             if OnGame is True:
                 #首の動き
-                current_time = time.time()
                 if current_time - last_move_time > move_interval:
                     if toggle:
-                        play_audio("1")
+                        play_audio_sync("1")
                         joints.move_joint_positions(pan=0, tilt=0.1)
                         detection_start_time = time.time() + detection_delay
                         m5.set_display_text(text="検知中", text_color=Colors.GREEN)
-                        move_interval = 8.0#上向き時間
+                        is_detecting = True
+                        move_interval = operating_time
                     else:
                         joints.move_joint_positions(pan=0, tilt=-0.3)
                         detection_start_time = None
-                        Moved = False
                         m5.set_display_text(text="停止中", text_color=Colors.BLUE)
-                        move_interval = 2.0#下向き時間
+                        is_detecting = False
+                        move_interval = waiting_time
+                        User_Moved = False
                     toggle = not toggle
                     last_move_time = current_time
             #動きの検出
@@ -192,10 +200,10 @@ def main() -> None:
                             dy = abs(y - prev_y)
                             dz = abs(z - prev_z)
                             if dx > 50 or dy > 50 or dz > 50:
-                                if not toggle and not Moved:
+                                if is_detecting and not User_Moved:
                                     print(f"[WARNING] Person {id} moved! Δx={dx}, Δy={dy}, Δz={dz}")
-                                    play_audio("move")
-                                    Moved = True
+                                    play_audio_async("move")
+                                    User_Moved = True
                                     m5.set_display_text(text="動いた！", text_color=Colors.RED)
                         previous_positions[id] = (x, y, z)
             if frame is not None:
