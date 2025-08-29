@@ -36,6 +36,6 @@ python3 main.py
 
 音声ファイルの作成には「VOICEVOX:春日部つむぎ」を使用しています。
 
-以下のページのプログラムを参考にしています
-https://github.com/AkariGroup/akari_yolo_inference
-https://github.com/geaxgx/depthai_blazepose.git
+以下のページのプログラムを参考にしています  
+https://github.com/AkariGroup/akari_yolo_inference  
+https://github.com/geaxgx/depthai_blazepose.git  
