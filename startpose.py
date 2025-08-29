@@ -92,8 +92,3 @@ while not start_game:
 renderer.exit()
 tracker.exit()
 sys.exit(0)
-
-# ---------------------
-# START YOLO TRACKING
-# ---------------------
-#subprocess.run(["python3", "tracking_yolo.py"])
