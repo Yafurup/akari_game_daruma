@@ -1,7 +1,7 @@
 akari-client[depthai]
 akari-proto
 ndjson
-tdqm
+tqdm
 playsound
 opencv-python >= 4.5.1.48
 open3d
