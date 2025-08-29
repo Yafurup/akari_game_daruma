@@ -30,6 +30,7 @@ AUDIO_FILES = {
     "finish":"voicefile/voice_finish.wav"
 }
 
+# 音声再生用の関数を宣言
 def play_audio_async(key):
     def _play():
         playsound(AUDIO_FILES[key])
@@ -107,7 +108,8 @@ def main() -> None:
         orbit = False
     end = False
 
-    previous_positions = {}#過去の位置
+    #過去位置の保存用
+    previous_positions = {}
     #ループ前に時間記録用変数を初期化
     last_move_time = time.time()
     operating_time = 4.0
@@ -117,12 +119,11 @@ def main() -> None:
     joints.set_servo_enabled(pan=True, tilt=True)
     toggle = False
     is_detecting = False
-    detection_delay = 1.0 #上を向いてから開始するまでの時間
+    detection_delay = 1.0 
     detection_start_time = None
     OnGame = True
     User_Moved = False
     
-    #labels = oakd_tracking_yolo.get_labels()
     m5.set_display_text(text="ゲーム開始", text_color=Colors.GREEN)
     play_audio_sync("start")
 
@@ -194,7 +195,6 @@ def main() -> None:
                         z = tracklet.spatialCoordinates.z
                         
                         if detection_start_time is not None and current_time >= detection_start_time and id in previous_positions:
-                            #if id in previous_positions:
                             prev_x, prev_y, prev_z = previous_positions[id]
                             dx = abs(x - prev_x)
                             dy = abs(y - prev_y)
