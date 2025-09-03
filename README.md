@@ -13,9 +13,7 @@ AKARIにだるまさんがころんだの鬼をやってもらうアプリ
 cd ~  
 git clone　https://github.com/AkariGroup/akari_game_daruma   
 cd akari_game_daruma  
-2. submoduleの更新  
-git submodule update --init  
-3. 仮想環境の作成  
+2. 仮想環境の作成  
 python3 -m venv venv  
 . venv/bin/activate  
 sudo apt install portaudio19-dev  
