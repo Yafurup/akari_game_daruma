@@ -204,7 +204,7 @@ def main() -> None:
                                     print(f"[WARNING] Person {id} moved! Δx={dx}, Δy={dy}, Δz={dz}")
                                     play_audio_async("move")
                                     User_Moved = True
-                                    m5.set_display_text(text="動いた！", text_color=Colors.RED)
+                                    m5.set_display_text(text="動いた!", text_color=Colors.RED)
                         previous_positions[id] = (x, y, z)
             if frame is not None:
                 oakd_tracking_yolo.display_frame("nn", frame, tracklets)
