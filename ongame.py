@@ -112,8 +112,8 @@ def main() -> None:
     previous_positions = {}
     #ループ前に時間記録用変数を初期化
     last_move_time = time.time()
-    operating_time = 4.0
-    waiting_time = 10.0
+    operating_time = 5.0
+    waiting_time = 2.0
     move_interval = waiting_time
     
     joints.set_servo_enabled(pan=True, tilt=True)
