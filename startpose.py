@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
-from BlazeposeRenderer import BlazeposeRenderer
 import argparse
 import subprocess
 import time
 import sys
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# サブモジュールのフォルダを追加
+sys.path.append(os.path.join(BASE_DIR, "depthai_blazepose"))
+
+from BlazeposeRenderer import BlazeposeRenderer
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--edge', action="store_true",
